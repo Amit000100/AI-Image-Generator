@@ -11,27 +11,28 @@ const ImgGenerator = () => {
             return 0;
         }
         setLoading(true);
-        const response = await fetch(
-            "https://api.openai.com/v1/images/generations",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer ",
-                    "user-Agent": "Chrome/",
-                },
-                body: JSON.stringify({
-                    prompt: `${inputRef.current.value}`,
-                    n: 1,
-                    size: "512x512",
-                }),
-            }
-        );
-        let data = await response.json();
-        // console.log(data);
-        let data_array = data.data;
-        setImage_url(data_array[0].url);
-        setLoading(false);
+        try {
+            // Using Pollinations.ai - Free API, no key required
+            const prompt = encodeURIComponent(inputRef.current.value);
+            const imageUrl = `https://image.pollinations.ai/prompt/${prompt}?width=512&height=512&nologo=true`;
+            
+            // Preload the image to ensure it's loaded before displaying
+            const img = new Image();
+            img.onload = () => {
+                setImage_url(imageUrl);
+                setLoading(false);
+            };
+            img.onerror = () => {
+                alert("Failed to generate image. Please try again.");
+                setLoading(false);
+            };
+            img.src = imageUrl;
+            
+        } catch (error) {
+            console.error("Error generating image:", error);
+            alert("An error occurred. Please try again.");
+            setLoading(false);
+        }
     }
     return (
         <div className="ai-image-generator">
